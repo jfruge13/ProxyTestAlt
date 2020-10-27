@@ -1,19 +1,79 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- master
+- '*'
 
-pool:
-  vmImage: 'ubuntu-latest'
+variables:
+  buildConfiguration: 'Release'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+stages:
+- stage: 'Build'
+  displayName: 'Build the web application'
+  jobs: 
+  - job: 'Build'
+    displayName: 'Build job'
+    pool:
+      vmImage: 'ubuntu-18.04'
+      demands:
+      - npm
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    variables:
+      dotnetSdkVersion: '3.1.300'
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core SDK $(dotnetSdkVersion)'
+      inputs:
+        version: '$(dotnetSdkVersion)'
+
+    - task: Npm@1
+      displayName: 'Run npm install'
+      inputs:
+        verbose: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build the project - $(buildConfiguration)'
+      inputs:
+        command: 'build'
+        arguments: '--no-restore --configuration $(buildConfiguration)'
+        projects: '**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish the project - $(buildConfiguration)'
+      inputs:
+        command: 'publish'
+        projects: '**/*.csproj'
+        publishWebProjects: false
+        arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+        zipAfterPublish: true
+
+    - publish: '$(Build.ArtifactStagingDirectory)'
+      artifact: drop
+
+- stage: 'Deploy'
+  displayName: 'Deploy the web application'
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    pool:
+      vmImage: 'ubuntu-18.04'
+    environment: dev
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: website'
+            inputs:
+              azureSubscription: 'devprojectsettings-proxytestalt'
+              appName: '$(WebAppName)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+              
