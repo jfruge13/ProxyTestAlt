@@ -76,4 +76,4 @@ stages:
               azureSubscription: 'devprojectsettings-proxytestalt'
               appName: '$(WebAppName)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-              
+              #
