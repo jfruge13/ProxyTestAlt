@@ -1,0 +1,15 @@
+﻿@model string
+
+@{
+    ViewBag.Title = "Page 1";
+}
+<h2>@ViewBag.Title</h2>
+
+<form action="@Model/Vendors/Create2" method="POST">
+    <input type="hidden" name="Name" value="Test CSRF" />
+    <input type="hidden" name="EntityTypeId" value="1" />
+    <input type="hidden" name="UserCrte" value="Anon" />
+    <input type="hidden" name="DateCrte" value="10/16/2020" />
+    <input type="hidden" name="Deleted" value="false" />
+    <input type="submit" value="Create Vendor" />
+</form>

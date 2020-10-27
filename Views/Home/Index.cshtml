@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <p class="lead">Sample MVC Site</p>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <h2>Home</h2>
+        <p>Anyone with an account can visit the home page. (@@Url.Action)</p>
+        <p><a class="btn btn-default" href='@Url.Action("Index", "Home", null, Request.Url.Scheme)'>Go &raquo;</a></p>
+    </div>
+    <div class="col-md-3">
+        <h2>Page 1</h2>
+        <p>Page 1 is for users in the AzAppProxyTest group. (@@Url.ActionLink)</p>
+        <p>@Html.ActionLink("Go »", "Page1", new { controller = "Home" }, new { @class = "btn btn-default" })</p>
+    </div>
+    <div class="col-md-3">
+        <h2>Page 2</h2>
+        <p>Page 1 is for users in the AzAppProxyTest2 group.</p>
+        <p><a class="btn btn-default" href='@Url.Action("Page2", "Home", null, Request.Url.Scheme)'>Go &raquo;</a></p>
+    </div>
+    <div class="col-md-3">
+        <h2>CSRF</h2>
+        <p>Sample CSRF attack</p>
+        <p><a class="btn btn-default" href='@Url.Action("CSRF", "Home", null, Request.Url.Scheme)'>Go &raquo;</a></p>
+    </div>
+</div>
